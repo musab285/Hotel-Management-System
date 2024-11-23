@@ -40,13 +40,26 @@ int checkUser(char name[], char password[]){
 
 int createUser(char name[], char password[]){
 	FILE *users = fopen("records.txt", "a");
-	
+	char file_name[30];
 	if(users == NULL){
 		printf("Error Occured\n");
 		return 0;
 	}else{
 		fputs(name, users);
 		fputs(password, users);
+		name[strcspn(name, "\n")] = '\0';
+		password[strcspn(password, "\n")] = '\0';
+		strcpy(file_name, name);
+		strcat(file_name, password);
+		strcat(file_name, ".txt");
+		printf("%s", file_name);
+		FILE *user_file = fopen(file_name, "w");
+		if(user_file == NULL){
+			printf("Error Occured!");
+			return 0;
+		}else{
+			fclose(user_file);
+		}
 		return 1;
 	}
 }
