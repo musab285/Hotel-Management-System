@@ -101,6 +101,84 @@ void bookRoom(int floor, int room){
 	}
 };
 
+#include <stdio.h>
+
+// Function for room service
+void Foodservices() {
+    FILE *file;
+    int choice;
+    int quantity;
+    float totalCost = 0.0;
+    char serviceName[50];
+    
+    // Open the file for writing
+    file = fopen("Foodservices.txt", "a");
+    if (file == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    printf("Food service Menu:\n");
+    printf("1. Breakfast - $10.00\n");
+    printf("2. Lunch - $20.00\n");
+    printf("3. Dinner - $25.00\n");
+    printf("4. Snacks - $5.00\n");
+    printf("5. Exit\n");
+
+    while (1) {
+        printf("\nEnter your choice (1-5): ");
+        scanf("%d", &choice);
+
+        if (choice == 5) {
+            printf("Exiting Food service.\n");
+            break;
+        }
+
+        switch (choice) {
+            case 1:
+                printf("You selected Breakfast.\n");
+                printf("Enter quantity: ");
+                scanf("%d", &quantity);
+                totalCost += quantity * 10.0;
+                fprintf(file, "Breakfast x%d: $%.2f\n", quantity, quantity * 10.0);
+                break;
+
+            case 2:
+                printf("You selected Lunch.\n");
+                printf("Enter quantity: ");
+                scanf("%d", &quantity);
+                totalCost += quantity * 20.0;
+                fprintf(file, "Lunch x%d: $%.2f\n", quantity, quantity * 20.0);
+                break;
+
+            case 3:
+                printf("You selected Dinner.\n");
+                printf("Enter quantity: ");
+                scanf("%d", &quantity);
+                totalCost += quantity * 25.0;
+                fprintf(file, "Dinner x%d: $%.2f\n", quantity, quantity * 25.0);
+                break;
+
+            case 4:
+                printf("You selected Snacks.\n");
+                printf("Enter quantity: ");
+                scanf("%d", &quantity);
+                totalCost += quantity * 5.0;
+                fprintf(file, "Snacks x%d: $%.2f\n", quantity, quantity * 5.0);
+                break;
+
+            default:
+                printf("Invalid choice. Please try again.\n");
+                break;
+        }
+    }
+
+    // Store total cost in the file
+    fprintf(file, "Total Cost: $%.2f\n\n", totalCost);
+    fclose(file);
+    printf("Your total cost is: $%.2f\n", totalCost);
+}
+
 int main(){
     char name[20]; 
     char pass[8];
@@ -139,12 +217,13 @@ int main(){
 		case 3:
     		return 0;
 	}
-	while(choice!=3){
+	while(choice!=4){
 	
 		printf("------------------------------------------------\n");
 		printf("		1. Check Available Rooms                        \n");
 	    printf("		2. Book A Room               \n");
-	    printf("		3. Exit                         \n");
+        printf("		3. Food services            \n");
+	    printf("		4. Exit                         \n");
 	    printf("------------------------------------------------\n");
 		scanf("%d", &choice);
 		
@@ -155,6 +234,9 @@ int main(){
 				printf("--------------------------------------\n");
 				availableRooms();
 				break;
+            case 3:
+                Foodservices();
+                break;
 			case 2:
 				printf("------------------------------------------------\n");
 				printf("		1. Delux Room                        \n");
