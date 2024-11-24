@@ -126,12 +126,14 @@ void bookRoom(int floor, int room, char name[], char password[], int days){
 	if(hotel_file == NULL){
 		printf("Error Occured!");
 	}else{
-		fprintf(hotel_file, "%s %c %d %d %d\n", name, type[floor], room+1, days, days*rates[floor]);
+		fprintf(hotel_file, "%s %c %d %d %d %d\n", name, type[floor], room+1, days, days*rates[floor], 0);
 		fclose(hotel_file);
 	}
 
 	
 	printf("Room Booked Successfully!\n");
+
+	
 
 };
 
@@ -147,6 +149,7 @@ void changeRoom(char name[], char password[], int floor, int room, int days){
 		int room;
 		int days;
 		int total;
+		int food;
 	};
 	struct hotel h;
 	//reading records from hotelrecord.txt until username is found
@@ -155,7 +158,7 @@ void changeRoom(char name[], char password[], int floor, int room, int days){
 		printf("Error Occured");
 	}else{
 		
-		while(fscanf(records, "%s %c %d %d %d", &h.name, &h.type, &h.room, &h.days, &h.total) != EOF){
+		while(fscanf(records, "%s %c %d %d %d %d", &h.name, &h.type, &h.room, &h.days, &h.total, &h.food) != EOF){
 			if(strcmp(h.name, name) == 0){
 				break;
 			}
@@ -215,12 +218,13 @@ void changeRoom(char name[], char password[], int floor, int room, int days){
 			printf("Error Occured!");
 			return;
 		}else{
-			while(fscanf(hotel_file, "%s %c %d %d %d", &h.name, &h.type, &h.room, &h.days, &h.total) != EOF){
+			while(fscanf(hotel_file, "%s %c %d %d %d", &h.name, &h.type, &h.room, &h.days, &h.total, &h.food) != EOF){
+				// if username is found, update the category, room number, days and total
 				if(strcmp(h.name, name) == 0){
-					fprintf(hotel_file_new, "%s %c %d %d %d\n", h.name, type[floor], room+1, days, days*rates[floor]);
+					fprintf(hotel_file_new, "%s %c %d %d %d\n", h.name, type[floor], room+1, days, days*rates[floor], h.food);
+				// if username is not found, write the record as it is
 				}else{
-					
-					fprintf(hotel_file_new, "%s %c %d %d %d\n", h.name, h.type, h.room, h.days, h.total);
+					fprintf(hotel_file_new, "%s %c %d %d %d\n", h.name, h.type, h.room, h.days, h.total, h.food);
 				}
 			}
 			fclose(hotel_file);
@@ -228,6 +232,92 @@ void changeRoom(char name[], char password[], int floor, int room, int days){
 		}
 	}
 	
+}
+
+void foododering(char name[])
+{
+    char file_name[30];
+    int foodbooking=0;
+    int numberofdays=0;
+    int foodtotal=0;
+    printf("------------------------------------------------\n");
+    printf("             We have three deal of food:        \n");
+    printf("------------------------------------------------\n");
+
+    printf("------------------------------------------------\n");
+    printf("                Deal 1: price 5000             \n");
+    printf("------------------------------------------------\n");
+    printf("1 -> Veg Manchurian\n");
+    printf("2 -> Mutton Fry\n");
+    printf("4 -> Shawarma Roll\n");
+    printf("5 -> Fish Fry\n");
+
+    printf("------------------------------------------------\n");
+    printf("                Deal 2: price 6000             \n");
+    printf("------------------------------------------------\n");
+    printf("1 -> Handi\n");
+    printf("2 -> Malai Boti\n");
+    printf("4 -> Kabab\n");
+    printf("5 -> Prawns\n");
+
+    printf("------------------------------------------------\n");
+    printf("                Deal 3: price 8000             \n");
+    printf("------------------------------------------------\n");
+    printf("1 -> Handi(Makhni)\n");
+    printf("2 -> Mutton Boti Fry\n");
+    printf("4 -> Ginger Chicken\n");
+    printf("5 -> Mushroom Gravy\n");
+
+    printf("press one for deal one and +1 for other:");
+    scanf("%d",&foodbooking);
+
+    printf("how many days of food you want:");
+    scanf("%d",&numberofdays);
+
+    if(foodbooking==1){
+        foodtotal=numberofdays*5000;
+    }
+    else if(foodbooking==2){
+        foodtotal=numberofdays*6000;
+    }
+    else if(foodbooking==3){
+        foodtotal=numberofdays*8000;
+    }else{
+		printf("invalid input");
+		return;
+	}
+
+	FILE *hotel_file = fopen("hotelrecord.txt", "r");
+	if(hotel_file == NULL){
+		printf("Error Occured!");
+		return;
+	}else{
+		FILE *hotel_file_new = fopen("hotelrecord.txt", "r+");
+		if(hotel_file_new == NULL){
+			printf("Error Occured!");
+			return;
+		}else{
+			struct hotel{
+				char name[20];
+				char type;
+				int room;
+				int days;
+				int total;
+				int food;
+			};
+			struct hotel h;
+			while(fscanf(hotel_file, "%s %c %d %d %d %d", &h.name, &h.type, &h.room, &h.days, &h.total, &h.food) != EOF){
+				if(strcmp(h.name, name) == 0){
+					fprintf(hotel_file_new, "%s %c %d %d %d %d\n", h.name, h.type, h.room, h.days, h.total, h.food+foodtotal);
+				}else{
+					fprintf(hotel_file_new, "%s %c %d %d %d %d\n", h.name, h.type, h.room, h.days, h.total, h.food);
+				}
+			}
+			fclose(hotel_file);
+			fclose(hotel_file_new);
+		}
+	}
+	printf("Food Ordered Successfully!\n");
 }
 
 int main(){
@@ -298,6 +388,11 @@ int main(){
 				printf("How many days do you want to book the room for? ");
 				scanf("%d", &choice);
 				bookRoom(floor-1, room-1, name, pass, choice);
+				printf("Do you want to avail our in-house food deals? (1/0): ");
+				scanf("%d", &choice);
+				if(choice == 1){
+					foododering(name);
+				}
 				break;
 			case 3:
 				printf("--------------------------------------\n");
