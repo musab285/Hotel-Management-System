@@ -39,27 +39,32 @@ int checkUser(char name[], char password[]){
 };
 
 int createUser(char name[], char password[]){
-	FILE *users = fopen("records.txt", "a");
+	FILE *users = fopen("records.txt", "r");
 	char file_name[30];
 	if(users == NULL){
 		printf("Error Occured\n");
 		return 0;
 	}else{
-		fputs(name, users);
-		fputs(password, users);
-		name[strcspn(name, "\n")] = '\0';
-		password[strcspn(password, "\n")] = '\0';
-		strcpy(file_name, name);
-		strcat(file_name, password);
-		strcat(file_name, ".txt");
-		printf("%s", file_name);
-		FILE *user_file = fopen(file_name, "w");
-		if(user_file == NULL){
-			printf("Error Occured!");
+		char name_in[20];
+		char pass_in[8];
+		while(fgets(name_in, sizeof(name_in), users) != NULL){
+			if(strcmp(name, name_in)==0){
+				printf("Username already exists!\n");
+				fclose(users);
+				return 0;
+			}
+			fgets(pass_in, sizeof(pass_in), users);
+		}
+		FILE *user = fopen("records.txt", "a");
+		if(user == NULL){
+			printf("Error Occured\n");
 			return 0;
 		}else{
-			fclose(user_file);
+			fputs(name, user);
+			fputs(password, user);
+			fclose(user);
 		}
+
 		return 1;
 	}
 }
@@ -70,7 +75,7 @@ void availableRooms(){
 		printf("Error Occured\n");
 	}else{
 		char room;
-		char type[4][10] = {"Deluxe", "Premium", "Standard", "Shared"};
+		char type[4][10] = {"Deluxe", "Premium", "Normal", "Shared"};
 		int floor_count = 0; 
 		int room_count = 0;
 		while(fscanf(rooms, "%c", &room) != EOF){
@@ -87,8 +92,10 @@ void availableRooms(){
 	}
 };
 
-void bookRoom(int floor, int room, char name[], char password[]){
+void bookRoom(int floor, int room, char name[], char password[], int days){
 	char rooms_arr[totalfloors][roomsonfloor+1];
+	char type[4] = {'D', 'P', 'N', 'S'};
+	int rates[4] = {10000, 7000, 4000, 2000};
 	char file_name[30];
 
 	FILE *rooms = fopen("roombooking.txt", "r");
@@ -114,18 +121,114 @@ void bookRoom(int floor, int room, char name[], char password[]){
         }
         fclose(rooms);
 	}
-	strcpy(file_name, name);
-	strcat(file_name, password);
-	strcat(file_name, ".txt");
-	FILE *user_file = fopen(file_name, "a");
-	if(user_file == NULL){
+	
+	FILE *hotel_file = fopen("hotelrecord.txt", "a");
+	if(hotel_file == NULL){
 		printf("Error Occured!");
 	}else{
-		fprintf(user_file,"%d\n%d\n", floor+1, room+1);
-		fclose(user_file);
+		fprintf(hotel_file, "%s %c %d %d %d\n", name, type[floor], room+1, days, days*rates[floor]);
+		fclose(hotel_file);
 	}
 
+	
+	printf("Room Booked Successfully!\n");
+
 };
+
+void changeRoom(char name[], char password[], int floor, int room, int days){
+
+	char type[4] = {'D', 'P', 'N', 'S'};
+	int rates[4] = {10000, 7000, 4000, 2000};
+
+	name[strcspn(name, "\n")] = '\0';
+	struct hotel{
+		char name[20];
+		char type;
+		int room;
+		int days;
+		int total;
+	};
+	struct hotel h;
+	//reading records from hotelrecord.txt until username is found
+	FILE *records = fopen("hotelrecord.txt", "r");
+	if(records == NULL){
+		printf("Error Occured");
+	}else{
+		
+		while(fscanf(records, "%s %c %d %d %d", &h.name, &h.type, &h.room, &h.days, &h.total) != EOF){
+			if(strcmp(h.name, name) == 0){
+				break;
+			}
+		}
+		fclose(records);
+	}
+
+	//updating roombooking.txt
+	FILE *rooms = fopen("roombooking.txt", "r");
+	if(rooms == NULL){
+		printf("Error Occured!");
+	}else{
+		char rooms_arr[totalfloors][roomsonfloor+1];
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 5; j++) {
+				fscanf(rooms, "%c", &rooms_arr[i][j]);
+			}
+		}
+		fclose(rooms);
+		if(rooms_arr[floor][room] == '1'){
+			printf("Room is already booked!\n");
+			return;
+		}else{
+			rooms_arr[floor][room] = '1';
+			if (h.type == 'D') {
+				rooms_arr[0][h.room-1] = '0';
+			} else if (h.type == 'P') {
+				rooms_arr[1][h.room-1] = '0';
+			} else if (h.type == 'N') {
+				rooms_arr[2][h.room-1] = '0';
+			} else if (h.type == 'S') {
+				rooms_arr[3][h.room-1] = '0';
+			}
+		}
+		FILE *rooms_new = fopen("roombooking.txt", "w");
+		if(rooms == NULL){
+			printf("Error Occured!");
+			return;
+		}else{
+			for (int i = 0; i < 4; i++) {
+				for (int j = 0; j < 5; j++) {
+					fprintf(rooms_new, "%c", rooms_arr[i][j]);
+				}
+			}
+			fclose(rooms);
+		}
+	}
+
+	//updating hotelrecord.txt
+	FILE *hotel_file = fopen("hotelrecord.txt", "r");
+	if(hotel_file == NULL){
+		printf("Error Occured!");
+		return;
+	}else{
+		FILE *hotel_file_new = fopen("hotelrecord.txt", "r+");
+		if(hotel_file_new == NULL){
+			printf("Error Occured!");
+			return;
+		}else{
+			while(fscanf(hotel_file, "%s %c %d %d %d", &h.name, &h.type, &h.room, &h.days, &h.total) != EOF){
+				if(strcmp(h.name, name) == 0){
+					fprintf(hotel_file_new, "%s %c %d %d %d\n", h.name, type[floor], room+1, days, days*rates[floor]);
+				}else{
+					
+					fprintf(hotel_file_new, "%s %c %d %d %d\n", h.name, h.type, h.room, h.days, h.total);
+				}
+			}
+			fclose(hotel_file);
+			fclose(hotel_file_new);
+		}
+	}
+	
+}
 
 int main(){
     char name[20]; 
@@ -165,12 +268,13 @@ int main(){
 		case 3:
     		return 0;
 	}
-	while(choice!=3){
+	while(1){
 	
 		printf("------------------------------------------------\n");
 		printf("		1. Check Available Rooms                        \n");
 	    printf("		2. Book A Room               \n");
-	    printf("		3. Exit                         \n");
+	    printf("		3. Change Room                         \n");
+	    printf("		4. Exit                         \n");
 	    printf("------------------------------------------------\n");
 		scanf("%d", &choice);
 		
@@ -185,17 +289,36 @@ int main(){
 				printf("------------------------------------------------\n");
 				printf("		1. Delux Room                        \n");
 	    		printf("		2. Premium Room               \n");
-	    		printf("		3. First Class                         \n");
+	    		printf("		3. Normal                         \n");
 	    		printf("		4. Shared                         \n");
 				printf("------------------------------------------------\n");
 				scanf("%d", &floor);
 				printf("Enter Room Number from available rooms of this category: ");
 				scanf("%d", &room);
-				bookRoom(floor-1, room-1, name, pass);
+				printf("How many days do you want to book the room for? ");
+				scanf("%d", &choice);
+				bookRoom(floor-1, room-1, name, pass, choice);
+				break;
+			case 3:
+				printf("--------------------------------------\n");
+				printf("          Available Rooms\n");
+				printf("--------------------------------------\n");
+				availableRooms();
+				printf("------------------------------------------------\n");
+				printf("		1. Delux Room                        \n");
+	    		printf("		2. Premium Room               \n");
+	    		printf("		3. Normal                         \n");
+	    		printf("		4. Shared                         \n");
+				printf("------------------------------------------------\n");
+				scanf("%d", &floor);
+				printf("Enter Room Number from available rooms of this category: ");
+				scanf("%d", &room);
+				printf("How many days do you want to book the room for? ");
+				scanf("%d", &choice);
+				changeRoom(name, pass, floor-1, room-1, choice);
+				break;
+			case 4:
+				return 0;	
 		}
-		printf("Press 3 to exit or any other number to continue");
-		scanf("%d", &choice);
 	}
-	return 0;
-    
 }
