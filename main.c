@@ -87,8 +87,10 @@ void availableRooms(){
 	}
 };
 
-void bookRoom(int floor, int room){
+void bookRoom(int floor, int room, char name[], char password[]){
 	char rooms_arr[totalfloors][roomsonfloor+1];
+	char file_name[30];
+
 	FILE *rooms = fopen("roombooking.txt", "r");
 	if(rooms == NULL){
 		printf("Error Occured!");
@@ -112,6 +114,17 @@ void bookRoom(int floor, int room){
         }
         fclose(rooms);
 	}
+	strcpy(file_name, name);
+	strcat(file_name, password);
+	strcat(file_name, ".txt");
+	FILE *user_file = fopen(file_name, "a");
+	if(user_file == NULL){
+		printf("Error Occured!");
+	}else{
+		fprintf(user_file,"%d\n%d\n", floor+1, room+1);
+		fclose(user_file);
+	}
+
 };
 
 int main(){
@@ -178,7 +191,7 @@ int main(){
 				scanf("%d", &floor);
 				printf("Enter Room Number from available rooms of this category: ");
 				scanf("%d", &room);
-				bookRoom(floor-1, room-1);
+				bookRoom(floor-1, room-1, name, pass);
 		}
 		printf("Press 3 to exit or any other number to continue");
 		scanf("%d", &choice);
