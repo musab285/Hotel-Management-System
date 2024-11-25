@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<string.h>
+#include<stdlib.h>
 
 #define totalfloors 4
 #define roomsonfloor 4
@@ -462,7 +463,8 @@ int main(){
     printf("		3. Exit                         \n");
     printf("------------------------------------------------\n");
     scanf("%d", &choice);
-    
+    system("cls");
+
     switch(choice){
     	case 1:
     		do{
@@ -471,6 +473,7 @@ int main(){
         		printf("Enter Password: ");
         		scanf("%s", &pass);
     		}while(checkUser(name, pass) == 0);
+			system("cls");
     		break;
     	case 2:
     		do{
@@ -482,6 +485,7 @@ int main(){
         		strcat(pass, "\n");
     		}while(createUser(name, pass) == 0);
     		break;
+			system("cls");
     
 		case 3:
     		return 0;
@@ -496,7 +500,7 @@ int main(){
 	    printf("		5. Exit                         \n");
 	    printf("------------------------------------------------\n");
 		scanf("%d", &choice);
-		
+
 		switch(choice){
 			case 1:
 				printf("--------------------------------------\n");
@@ -514,13 +518,16 @@ int main(){
 				scanf("%d", &floor);
 				printf("Enter Room Number from available rooms of this category: ");
 				scanf("%d", &room);
+				system("cls");
 				printf("How many days do you want to book the room for? ");
 				scanf("%d", &choice);
+				system("cls");
 				if(bookRoom(floor-1, room-1, name, pass, choice)!=0){
 					printf("Do you want to avail our in-house food deals? (1/0): ");
 					scanf("%d", &choice);
 					if(choice == 1){
 						foododering(name);
+						system("cls");
 					}
 				}
 				break;
@@ -538,8 +545,10 @@ int main(){
 				scanf("%d", &floor);
 				printf("Enter Room Number from available rooms of this category: ");
 				scanf("%d", &room);
+				system("cls");
 				printf("How many days do you want to book the room for? ");
 				scanf("%d", &choice);
+				system("cls");
 				changeRoom(name, pass, floor-1, room-1, choice);
 				break;
 			case 4:
