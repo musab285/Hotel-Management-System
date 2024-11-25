@@ -13,7 +13,6 @@ int checkUser(char name[], char password[]){
     else{
         char name_in[20];
         char pass_in[8];
-        char unused;
 
         while(fgets(name_in, sizeof(name_in), users) != NULL ){
         	
@@ -92,7 +91,7 @@ void availableRooms(){
 	}
 };
 
-int bookRoom(int floor, int room, char name[], char password[], int days){
+int bookRoom(int floor, int room, char name[], int days){
 	char rooms_arr[totalfloors][roomsonfloor+1];
 	char type[4] = {'D', 'P', 'N', 'S'};
 	int rates[4] = {10000, 7000, 4000, 2000};
@@ -110,7 +109,7 @@ int bookRoom(int floor, int room, char name[], char password[], int days){
         }
         fclose(rooms);
 		if(rooms_arr[floor][room]=='1'){
-			printf("wrong room entered!\n");
+			printf("Room Already Occupied!\n");
 			return 0;
 		}
 		rooms_arr[floor][room] = '1';
@@ -516,7 +515,7 @@ int main(){
 				scanf("%d", &room);
 				printf("How many days do you want to book the room for? ");
 				scanf("%d", &choice);
-				if(bookRoom(floor-1, room-1, name, pass, choice)!=0){
+				if(bookRoom(floor-1, room-1, name, choice)!=0){
 					printf("Do you want to avail our in-house food deals? (1/0): ");
 					scanf("%d", &choice);
 					if(choice == 1){
