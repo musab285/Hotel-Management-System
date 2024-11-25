@@ -92,7 +92,7 @@ void availableRooms(){
 	}
 };
 
-void bookRoom(int floor, int room, char name[], char password[], int days){
+int bookRoom(int floor, int room, char name[], char password[], int days){
 	char rooms_arr[totalfloors][roomsonfloor+1];
 	char type[4] = {'D', 'P', 'N', 'S'};
 	int rates[4] = {10000, 7000, 4000, 2000};
@@ -101,6 +101,7 @@ void bookRoom(int floor, int room, char name[], char password[], int days){
 	FILE *rooms = fopen("roombooking.txt", "r");
 	if(rooms == NULL){
 		printf("Error Occured!");
+		return 0;
 	}else{
 		for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 5; j++) {
@@ -108,11 +109,16 @@ void bookRoom(int floor, int room, char name[], char password[], int days){
             }
         }
         fclose(rooms);
+		if(rooms_arr[floor][room]=='1'){
+			printf("wrong room entered!\n");
+			return 0;
+		}
 		rooms_arr[floor][room] = '1';
 	}
 	FILE *rooms_new = fopen("roombooking.txt", "w");
 	if(rooms == NULL){
 		printf("Error Occured!");
+		return 0;
 	}else{
 		for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 5; j++) {
@@ -125,6 +131,7 @@ void bookRoom(int floor, int room, char name[], char password[], int days){
 	FILE *hotel_file = fopen("hotelrecord.txt", "a");
 	if(hotel_file == NULL){
 		printf("Error Occured!");
+		return 0;
 	}else{
 		fprintf(hotel_file, "%s %c %d %d %d %d\n", name, type[floor], room+1, days, days*rates[floor], 0);
 		fclose(hotel_file);
@@ -132,7 +139,7 @@ void bookRoom(int floor, int room, char name[], char password[], int days){
 
 	
 	printf("Room Booked Successfully!\n");
-
+	return 1;
 	
 
 };
@@ -236,6 +243,7 @@ void changeRoom(char name[], char password[], int floor, int room, int days){
 
 void foododering(char name[])
 {
+	name[strcspn(name, "\n")] = '\0';
     char file_name[30];
     int foodbooking=0;
     int numberofdays=0;
@@ -508,11 +516,12 @@ int main(){
 				scanf("%d", &room);
 				printf("How many days do you want to book the room for? ");
 				scanf("%d", &choice);
-				bookRoom(floor-1, room-1, name, pass, choice);
-				printf("Do you want to avail our in-house food deals? (1/0): ");
-				scanf("%d", &choice);
-				if(choice == 1){
-					foododering(name);
+				if(bookRoom(floor-1, room-1, name, pass, choice)!=0){
+					printf("Do you want to avail our in-house food deals? (1/0): ");
+					scanf("%d", &choice);
+					if(choice == 1){
+						foododering(name);
+					}
 				}
 				break;
 			case 3:
